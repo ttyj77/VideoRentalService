@@ -17,6 +17,42 @@ public class CustomerDTO {
 
     private String nickname;
     private int role;
+    private String country;
+    private String city;
+    private String detailsAddress;
+    private String phone;
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getDetailsAddress() {
+        return detailsAddress;
+    }
+
+    public void setDetailsAddress(String detailsAddress) {
+        this.detailsAddress = detailsAddress;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
 
     public int getRole() {
         return role;

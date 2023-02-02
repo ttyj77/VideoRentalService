@@ -10,12 +10,9 @@ public class FilmRentalServiceMain {
     public static void main(String[] args) {
         ConnectionMaker connectionMaker = new MysqlConnectionMaker();
         CustomerDTO logIn = new CustomerDTO();
-        CustomerViewer customerViewer = new CustomerViewer(connectionMaker,logIn);
-
+        CustomerViewer customerViewer = new CustomerViewer(connectionMaker, logIn);
 
         customerViewer.showIndex();
     }
-
-
 
 }

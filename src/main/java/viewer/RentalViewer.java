@@ -3,8 +3,10 @@ package viewer;
 import controller.FilmController;
 import controller.RentalController;
 import model.CustomerDTO;
+import model.RentalDTO;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class RentalViewer {
@@ -24,12 +26,18 @@ public class RentalViewer {
     }
 
 
-
-    public void printRentalList(){
-        rentalController.printRentalList();
-
-
-    }
+//    public void printRentalList() {
+//        ArrayList<RentalDTO> list = rentalController.printRentalList();
+//        if (list.isEmpty()) {
+//            System.out.println("아직 렌탈 요청이 존재하지 않습니다.");
+//        } else {
+//            for (RentalDTO r : list) {
+//                System.out.println("고객번호 : " + r.getCustomer_id() + "요청 영화아이디 : " + r.getFilm_id());
+//            }
+//        }
+//
+//
+//    }
 
 
 }

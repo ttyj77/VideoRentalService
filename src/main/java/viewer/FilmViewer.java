@@ -8,6 +8,7 @@ import dbConn.MysqlConnectionMaker;
 import model.ActorDTO;
 import model.CustomerDTO;
 import model.FilmDTO;
+import model.RentalDTO;
 import util.ScannerUtil;
 
 import java.sql.Connection;
@@ -27,6 +28,8 @@ public class FilmViewer {
     private CustomerViewer customerViewer;
     private CustomerController customerController;
     ConnectionMaker connectionMaker = new MysqlConnectionMaker();
+    int pageNum = 0;
+    int page = 30;
 
     public FilmViewer(Connection connection, Scanner scanner, CustomerDTO logIn) {
         this.SCANNER = scanner;
@@ -44,11 +47,11 @@ public class FilmViewer {
         String message = "1. 모든영화목록보기  2. 조건별 검색하기  3. 뒤로가기 ";
         int userChoice = ScannerUtil.nextInt(SCANNER, message);
         if (userChoice == 1) {
+            pageNum = 0;
             printFilmList();
         } else if (userChoice == 2) {
             searchMenu();
         } else if (userChoice == 3) {
-            customerViewer.showMenu();
         }
 
     }
@@ -72,28 +75,52 @@ public class FilmViewer {
 
     private void printFilmList() {
         FilmController filmController = new FilmController(connection);
-        ArrayList<FilmDTO> list = filmController.filmAllList();
+
+        ArrayList<FilmDTO> list = filmController.filmAllList(pageNum);
         if (list.isEmpty()) {
-            System.out.println("등록된 영화가 없습니다.");
+            if (pageNum < 0) {
+                pageNum = 0;
+            } else if (pageNum > list.size()) {
+                pageNum = list.size() - 31;
+            }
+            printFilmList();
         } else {
             for (FilmDTO f : list) {
                 System.out.printf("%d. %s 개봉연도 %s\n", f.getFilm_id(), f.getTitle(), f.getRelease_year());
             }
-            String message = "상세보기할 영화DVD의 번호를 입력해주세요 or 뒤로가기 원하시면 0을 입력해주세요";
-            int userChoice = ScannerUtil.nextInt(SCANNER, message);
-            while (userChoice != 0 && !list.contains(new FilmDTO(userChoice))) {
-                System.out.println("잘못입력하셨습니다.");
-                userChoice = ScannerUtil.nextInt(SCANNER, message);
-            }
-            if (userChoice != 0) {
-                printOne(userChoice);
+            String message = "A. 이전 페이지       B.다음페이지\n- 상세보기할 영화DVD의 번호를 입력해주세요 or 뒤로가기 원하시면 0을 입력해주세요";
+
+            String input = ScannerUtil.nextLine(SCANNER, message);
+
+            if (input.equalsIgnoreCase("a")) {
+                pageNum = pageNum - page;
+                printFilmList();
+            } else if (input.equalsIgnoreCase("b")) {
+                pageNum = pageNum + page;
+                printFilmList();
+            } else {
+                try {
+                    int userChoice = Integer.parseInt(input);
+                    while (userChoice != 0 && !list.contains(new FilmDTO(userChoice))) {
+                        System.out.println("잘못입력하셨습니다.");
+                        message = "a. 이전 페이지 b.다음페이지 \n 상세보기할 영화DVD의 번호를 입력해주세요 or 뒤로가기 원하시면 0을 입력해주세요";
+                        userChoice = ScannerUtil.nextInt(SCANNER, message);
+                    }
+                    if (userChoice != 0) {
+                        printOne(userChoice);
+                    }
+                    if (userChoice == 0) {
+                        showFilmRentalMenu();
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("잘못입력하셨습니다!");
+                    printFilmList();
+                }
             }
         }
     }
 
     private void printOne(int id) {
-//        UserController userController = new UserController(connection);
-//        ReplyViewer replyViewer = new ReplyViewer(SCANNER, connection, logIn);
         DateFormat df = new SimpleDateFormat(DATE_FORMAT);
         FilmDTO filmDTO = filmController.selectOne(id);
 
@@ -131,19 +158,21 @@ public class FilmViewer {
 //            replyViewer.showMenu(id);
 //            printOne(id);
         } else if (userChoice == 4) {
+
 //            printList();
         }
     }
 
     public void rental(CustomerDTO logIn, FilmDTO filmDTO) {
-        String message = filmDTO.getTitle() + " 를" + "대여하시겠습니까? Y/N";
+        String message = filmDTO.getTitle() + " 를" + "대여하시겠습니까? Y/N" + "    대여비용은  : " + filmDTO.getRental_rate() + "$ 입니다.";
         String yesNo = ScannerUtil.nextLine(SCANNER, message);
         if (yesNo.equalsIgnoreCase("Y")) {
-            System.out.println("대여비용은 " + filmDTO.getRental_rate() + "$ 입니다.");
-            rentalController.rental(logIn, filmDTO);
-//            showFilmRentalMenu();
+            RentalDTO r = new RentalDTO();
+            r.setFilm_id(filmDTO.getFilm_id());
+            r.setCustomer_id(logIn.getCustomer_id());
+            rentalController.insert(r);
+            System.out.println("대여요청이 완료되었습니다.");
         } else {
-
             printOne(filmDTO.getFilm_id());
         }
     }
@@ -180,40 +209,89 @@ public class FilmViewer {
     }
 
     public void PrintRatingList(String rating) {
-        ArrayList<FilmDTO> list = filmController.ratingList(rating);
+        ArrayList<FilmDTO> list = filmController.ratingList(rating, pageNum);
         if (list.isEmpty()) {
-            System.out.println("해당하는 영화가 없습니다.");
+            if (pageNum < 0) {
+                pageNum = 0;
+            } else if (pageNum > list.size()) {
+                pageNum = list.size() - 31;
+            }
+            PrintRatingList(rating);
         } else {
             for (FilmDTO f : list) {
                 System.out.printf("%d. %s 개봉연도 %s\n", f.getFilm_id(), f.getTitle(), f.getRelease_year());
             }
-            String message = "상세보기할 영화DVD의 번호를 입력해주세요 or 뒤로가기 원하시면 0을 입력해주세요";
-            int userChoice = ScannerUtil.nextInt(SCANNER, message);
-            while (userChoice != 0 && !list.contains(new FilmDTO(userChoice))) {
-                System.out.println("잘못입력하셨습니다.");
-                userChoice = ScannerUtil.nextInt(SCANNER, message);
-            }
-            if (userChoice != 0) {
-                printOne(userChoice);
+            String message = "A. 이전 페이지       B.다음페이지\n- 상세보기할 영화DVD의 번호를 입력해주세요 or 뒤로가기 원하시면 0을 입력해주세요";
+
+            String input = ScannerUtil.nextLine(SCANNER, message);
+
+            if (input.equalsIgnoreCase("a")) {
+                pageNum = pageNum - page;
+                PrintRatingList(rating);
+            } else if (input.equalsIgnoreCase("b")) {
+                pageNum = pageNum + page;
+                PrintRatingList(rating);
+            } else {
+                try {
+                    int userChoice = Integer.parseInt(input);
+                    while (userChoice != 0 && !list.contains(new FilmDTO(userChoice))) {
+                        System.out.println("잘못입력하셨습니다.");
+                        message = "a. 이전 페이지 b.다음페이지 \n 상세보기할 영화DVD의 번호를 입력해주세요 or 뒤로가기 원하시면 0을 입력해주세요";
+                        userChoice = ScannerUtil.nextInt(SCANNER, message);
+                    }
+                    if (userChoice != 0) {
+                        printOne(userChoice);
+                    }
+                    if (userChoice == 0) {
+                        showFilmRentalMenu();
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("잘못입력하셨습니다!");
+                    PrintRatingList(rating);
+                }
             }
         }
     }
 
     public void PrintCategoryList(int category_id) {
-        ArrayList<FilmDTO> list = filmController.categoryList(category_id);
-        for (FilmDTO f : list) {
-            System.out.printf("%d. %s  - 장르 : %s\n", f.getFilm_id(), f.getTitle(), f.getCategoryName());
-        }
-        String message = "상세보기할 영화DVD의 번호를 입력해주세요 or 뒤로가기 원하시면 0을 입력해주세요";
-        int userChoice = ScannerUtil.nextInt(SCANNER, message);
-        while (userChoice != 0 && !list.contains(new FilmDTO(userChoice))) {
-            System.out.println("잘못입력하셨습니다.");
-            userChoice = ScannerUtil.nextInt(SCANNER, message);
-        }
-        if (userChoice != 0) {
-            printOne(userChoice);
+        ArrayList<FilmDTO> list = filmController.categoryList(category_id, pageNum);
+        if (list.isEmpty()) {
+            if (pageNum < 0) {
+                pageNum = 0;
+            } else if (pageNum > list.size()) {
+                pageNum = list.size() - 31;
+            }
+            PrintCategoryList(category_id);
+        } else {
+            for (FilmDTO f : list) {
+                System.out.printf("%d. %s  - 장르 : %s\n", f.getFilm_id(), f.getTitle(), f.getCategoryName());
+            }
+            String message = "A. 이전 페이지       B.다음페이지\n- 상세보기할 영화DVD의 번호를 입력해주세요 or 뒤로가기 원하시면 0을 입력해주세요";
+            String input = ScannerUtil.nextLine(SCANNER, message);
+
+            if (input.equalsIgnoreCase("a")) {
+                pageNum = pageNum - page;
+                PrintCategoryList(category_id);
+            } else if (input.equalsIgnoreCase("b")) {
+                pageNum = pageNum + page;
+                PrintCategoryList(category_id);
+            } else {
+                int userChoice = Integer.parseInt(input);
+                while (userChoice != 0 && !list.contains(new FilmDTO(userChoice))) {
+                    System.out.println("잘못입력하셨습니다.");
+                    message = "a. 이전 페이지 b.다음페이지 \n 상세보기할 영화DVD의 번호를 입력해주세요 or 뒤로가기 원하시면 0을 입력해주세요";
+                    userChoice = ScannerUtil.nextInt(SCANNER, message);
+                }
+                if (userChoice != 0) {
+                    printOne(userChoice);
+                }
+                if (userChoice == 0) {
+                    PrintCategoryList(category_id);
+                }
+            }
         }
     }
+
 }
 
 

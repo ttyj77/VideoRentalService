@@ -40,4 +40,19 @@ public class ActorDTO {
     public void setLast_update(Date last_update) {
         this.last_update = last_update;
     }
+
+    public ActorDTO() {
+    }
+
+    public ActorDTO(int actor_id) {
+        this.actor_id = actor_id;
+    }
+
+    public boolean equals(Object o) {
+        if (o instanceof ActorDTO) {
+            ActorDTO f = (ActorDTO) o;
+            return actor_id == f.actor_id;
+        }
+        return false;
+    }
 }

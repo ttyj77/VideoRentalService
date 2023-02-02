@@ -23,9 +23,7 @@ public class MysqlConnectionMaker implements ConnectionMaker {
             throw new RuntimeException();
 
         }
-
         return connection;
-
     }
 
 }

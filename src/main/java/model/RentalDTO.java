@@ -11,6 +11,24 @@ public class RentalDTO {
     private int staff_id;
     private Date last_update;
     private int film_id;
+    private int rental_duration;
+    private String title;
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public int getRental_duration() {
+        return rental_duration;
+    }
+
+    public void setRental_duration(int rental_duration) {
+        this.rental_duration = rental_duration;
+    }
 
     public int getFilm_id() {
         return film_id;
@@ -75,4 +93,26 @@ public class RentalDTO {
     public void setLast_update(Date last_update) {
         this.last_update = last_update;
     }
+
+    public RentalDTO(RentalDTO origin) {
+        rental_id = origin.getRental_id();
+        film_id = origin.getFilm_id();
+        customer_id = origin.getCustomer_id();
+    }
+
+    public RentalDTO() {
+
+    }
+    public RentalDTO(int rental_id){
+        this.rental_id = rental_id;
+    }
+
+    public boolean equals(Object o) {
+        if (o instanceof RentalDTO) {
+            RentalDTO f = (RentalDTO) o;
+            return rental_id == f.rental_id;
+        }
+        return false;
+    }
+
 }

@@ -1,6 +1,7 @@
 package model;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class FilmDTO {
@@ -12,7 +13,7 @@ public class FilmDTO {
     private int language_id;
     private int original_language_id;
     private int rental_duration;
-    private BigDecimal rental_rate;
+    private int rental_rate;
     private int length;
     private BigDecimal replacement_cost;
     private String rating; //enum 타입인데 '-' 때문에 지정이 안됨
@@ -23,6 +24,15 @@ public class FilmDTO {
     private String first_name;
 
     private String categoryName;
+    private ArrayList<Integer> actor_id;
+
+    public ArrayList<Integer> getActor_id() {
+        return actor_id;
+    }
+
+    public void setActor_id(ArrayList<Integer> actor_id) {
+        this.actor_id = actor_id;
+    }
 
     public String getCategoryName() {
         return categoryName;
@@ -104,11 +114,11 @@ public class FilmDTO {
         this.rental_duration = rental_duration;
     }
 
-    public BigDecimal getRental_rate() {
+    public int getRental_rate() {
         return rental_rate;
     }
 
-    public void setRental_rate(BigDecimal rental_rate) {
+    public void setRental_rate(int rental_rate) {
         this.rental_rate = rental_rate;
     }
 
